@@ -33,7 +33,7 @@
 
 JAR=$AVAIL_HOME/lib/avail-workbench-1.4-all.jar
 
-source avail-config
+source "${0%/*}"/avail-config
 
 # Launch the Avail development environment
 if [ "$FORCE_FOREGROUND" = true ]; then

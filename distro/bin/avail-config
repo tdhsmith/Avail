@@ -88,83 +88,136 @@ ENABLE_ASSERTIONS=
 AVAIL_DEVELOPER=
 declare -a ADDITIONAL_ROOTS
 
-if [ "$SKIP_OPT" = true ]; then
-    OPTIND=1
-else
-  # Read options
-  while getopts ":a:cdDeEf?" opt; do
-    case ${opt} in
-      a )
-        # [a]dd an entry to the AVAIL_ROOTS list
-        ADDITIONAL_ROOTS+=( "$OPTARG" )
-        ;;
-      c )
-        # add the [c]urrent directory to the AVAIL_ROOTS list
-        improvised_name="${PWD##*/}"
-        improvised_name="${improvised_name%%.*}"
-        improvised_name="local.$USER.${improvised_name// /}"
-        # the root's name is given as local.username.directoryname
-        ADDITIONAL_ROOTS+=( "$improvised_name=$REPO_DIR/$improvised_name.repo,$PWD" )
-        ;;
-      d )
-        # perform a [d]ry run and output the final command instead of running it
-        DRY_RUN=true
-        ;;
-      D )
-        # run with the availDeveloper property set to access additional menus
-        AVAIL_DEVELOPER=true
-        ;;
-      e )
-        # Enable assertions
-        ENABLE_ASSERTIONS=true
-        ;;
-      E )
-        # omit the [E]xamples in the default roots
-        USE_EXAMPLE_ROOTS=
-        ;;
-      f )
-        # run in the [f]oreground
-        FORCE_FOREGROUND=true
-        ;;
-      \? )
-        if [ "$OPTARG" != "?" ]; then
-          # getopts uses ? to indicate unknown option
-          echo "Unknown option: $OPTARG" 1>&2
-        else
-          # this is a "real" -? flag, so print the [h]elp
-          echo "Usage:" 
-          echo "  ANY -?"
-          echo "  avail-dev [-a roots] [-c] [-d] [-D] [-E] [-f] [initial_module]"
-          echo "  avail-server [-a roots] [-c] [-d] [-E] [-f]"
-          echo "  availc ..."
-          echo "Commands:"
-          echo "  avail-dev    Launch the interactive workbench UI."
-          echo "  avail-server Launch the avail web server."
-          echo "  availc       Launch the avail CLI compiler. This tool has its own command"
-          echo "               and argument syntax, viewable with the -? option."
-          echo "Options:"
-          echo "  -?        Print this help."
-          echo "  -a ROOTS  Append the given string to the avail roots list, either as set in"
-          echo "            the corresponding environment variable or in this cmd's defaults."
-          echo "  -c        Add the current working directory to the avail roots (see above),"
-          echo "            using local.\$USER.DIRECTORY as its improvised root name."
-          echo "  -d        Dry run - print the final Java VM invocation instead of running."
-          echo "  -D        Run in Developer mode, which gives access to tools for debugging"
-          echo "            the Avail Virtual Machine and other internals."
-          echo "  -e        Enable Java assertions (passes the -ea flag to the JVM)."
-          echo "  -E        Omit the examples root from the default roots list."
-          echo "  -f        Force the workbench command to run in the foreground."
-          exit 0
-        fi
-        ;;
-      : )
-        echo "Invalid option: $OPTARG requires an argument" 1>&2
-        ;;
-    esac
-  done
-  # Remove the parsed arguments
-  shift $((OPTIND - 1))
-fi
+case "$(basename "$0")" in
+  avail-dev )
+    # Read workbench options
+    while getopts ":a:cdDeEf?" opt; do
+      case ${opt} in
+        a )
+          # [a]dd an entry to the AVAIL_ROOTS list
+          ADDITIONAL_ROOTS+=( "$OPTARG" )
+          ;;
+        c )
+          # add the [c]urrent directory to the AVAIL_ROOTS list
+          improvised_name="${PWD##*/}"
+          improvised_name="${improvised_name%%.*}"
+          improvised_name="local.$USER.${improvised_name// /}"
+          # the root's name is given as local.username.directoryname
+          ADDITIONAL_ROOTS+=( "$improvised_name=$REPO_DIR/$improvised_name.repo,$PWD" )
+          ;;
+        d )
+          # perform a [d]ry run and output the final command instead of running it
+          DRY_RUN=true
+          ;;
+        D )
+          # run with the availDeveloper property set to access additional menus
+          AVAIL_DEVELOPER=true
+          ;;
+        e )
+          # Enable assertions
+          ENABLE_ASSERTIONS=true
+          ;;
+        E )
+          # omit the [E]xamples in the default roots
+          USE_EXAMPLE_ROOTS=
+          ;;
+        f )
+          # run in the [f]oreground
+          FORCE_FOREGROUND=true
+          ;;
+        \? )
+          if [ "$OPTARG" != "?" ]; then
+            # getopts uses ? to indicate unknown option
+            echo "Unknown option: $OPTARG" 1>&2
+          else
+            # this is a "real" -? flag, so print the [h]elp
+              echo "  Launch the interactive workbench UI."
+              echo "Usage:"
+              echo "  avail-dev -?"
+              echo "  avail-dev [-a roots] [-c] [-d] [-D] [-e] [-E] [-f] [initial_module]"
+              echo "Options:"
+              echo "  -?        Print this help."
+              echo "  -a ROOTS  Append the given string to the avail roots list, either as set in"
+              echo "            the corresponding environment variable or in this cmd's defaults."
+              echo "  -c        Add the current working directory to the avail roots (see above),"
+              echo "            using local.\$USER.DIRECTORY as its improvised root name."
+              echo "  -d        Dry run - print the final Java VM invocation instead of running."
+              echo "  -D        Run in Developer mode, which gives access to tools for debugging"
+              echo "            the Avail Virtual Machine and other internals."
+              echo "  -e        Enable Java assertions (passes the -ea flag to the JVM)."
+              echo "  -E        Omit the examples root from the default roots list."
+              echo "  -f        Force the workbench command to run in the foreground."
+              exit 0
+          fi
+          ;;
+        : )
+          echo "Invalid option: $OPTARG requires an argument" 1>&2
+          ;;
+      esac
+    done
+    shift $((OPTIND - 1))
+    ;;
+  avail-server )
+    # Read server options
+    while getopts ":a:cdEf?" opt; do
+      case ${opt} in
+        a )
+          # [a]dd an entry to the AVAIL_ROOTS list
+          ADDITIONAL_ROOTS+=( "$OPTARG" )
+          ;;
+        c )
+          # add the [c]urrent directory to the AVAIL_ROOTS list
+          improvised_name="${PWD##*/}"
+          improvised_name="${improvised_name%%.*}"
+          improvised_name="local.$USER.${improvised_name// /}"
+          # the root's name is given as local.username.directoryname
+          ADDITIONAL_ROOTS+=( "$improvised_name=$REPO_DIR/$improvised_name.repo,$PWD" )
+          ;;
+        d )
+          # perform a [d]ry run and output the final command instead of running it
+          DRY_RUN=true
+          ;;
+        E )
+          # omit the [E]xamples in the default roots
+          USE_EXAMPLE_ROOTS=
+          ;;
+        f )
+          # run in the [f]oreground
+          FORCE_FOREGROUND=true
+          ;;
+        \? )
+          if [ "$OPTARG" != "?" ]; then
+            # getopts uses ? to indicate unknown option
+            echo "Unknown option: $OPTARG" 1>&2
+          else
+            # this is a "real" -? flag, so print the [h]elp
+              echo "  Start the Avail server and begin accepting commands over websocket."
+              echo "Usage:"
+              echo "  avail-server -?"
+              echo "  avail-server [-a roots] [-c] [-d] [-E] [-f]"
+              echo "Options:"
+              echo "  -?        Print this help."
+              echo "  -a ROOTS  Append the given string to the avail roots list, either as set in"
+              echo "            the corresponding environment variable or in this cmd's defaults."
+              echo "  -c        Add the current working directory to the avail roots (see above),"
+              echo "            using local.\$USER.DIRECTORY as its improvised root name."
+              echo "  -d        Dry run - print the final Java VM invocation instead of running."
+              echo "  -E        Omit the examples root from the default roots list."
+              echo "  -f        Force the workbench command to run in the foreground."
+              exit 0
+          fi
+          ;;
+        : )
+          echo "Invalid option: $OPTARG requires an argument" 1>&2
+          ;;
+      esac
+    done
+    shift $((OPTIND - 1))
+    ;;
+
+  # Note there is no case for availc. It uses this config script but
+  # handles its own options, arguments, and usage help.
+esac
 
 
 # If AVAIL_ROOTS is not set, then default it.

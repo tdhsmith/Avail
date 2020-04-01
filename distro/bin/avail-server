@@ -33,7 +33,7 @@
 
 JAR=$AVAIL_HOME/lib/avail-server-1.4-all.jar
 
-source avail-config
+source "${0%/*}"/avail-config
 
 # Launch the Avail server
 if [ "$FORCE_FOREGROUND" = true ]; then
