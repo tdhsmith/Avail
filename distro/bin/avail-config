@@ -85,13 +85,14 @@ USE_EXAMPLE_ROOTS=true
 DRY_RUN=
 FORCE_FOREGROUND=
 ENABLE_ASSERTIONS=
+AVAIL_DEVELOPER=
 declare -a ADDITIONAL_ROOTS
 
 if [ "$SKIP_OPT" = true ]; then
     OPTIND=1
 else
   # Read options
-  while getopts ":a:cdeEf?" opt; do
+  while getopts ":a:cdDeEf?" opt; do
     case ${opt} in
       a )
         # [a]dd an entry to the AVAIL_ROOTS list
@@ -108,6 +109,10 @@ else
       d )
         # perform a [d]ry run and output the final command instead of running it
         DRY_RUN=true
+        ;;
+      D )
+        # run with the availDeveloper property set to access additional menus
+        AVAIL_DEVELOPER=true
         ;;
       e )
         # Enable assertions
@@ -129,7 +134,7 @@ else
           # this is a "real" -? flag, so print the [h]elp
           echo "Usage:" 
           echo "  ANY -?"
-          echo "  avail-dev [-a roots] [-c] [-d] [-E] [-f] [initial_module]"
+          echo "  avail-dev [-a roots] [-c] [-d] [-D] [-E] [-f] [initial_module]"
           echo "  avail-server [-a roots] [-c] [-d] [-E] [-f]"
           echo "  availc ..."
           echo "Commands:"
@@ -144,6 +149,8 @@ else
           echo "  -c        Add the current working directory to the avail roots (see above),"
           echo "            using local.\$USER.DIRECTORY as its improvised root name."
           echo "  -d        Dry run - print the final Java VM invocation instead of running."
+          echo "  -D        Run in Developer mode, which gives access to tools for debugging"
+          echo "            the Avail Virtual Machine and other internals."
           echo "  -e        Enable Java assertions (passes the -ea flag to the JVM)."
           echo "  -E        Omit the examples root from the default roots list."
           echo "  -f        Force the workbench command to run in the foreground."
@@ -196,6 +203,9 @@ fi
 VMARGS=(-Xmx2g -classpath "$AVAIL_HOME/lib" $OSARGS "-Djava.util.logging.config.file=$HOME/.avail/logging.properties" "-DavailRoots=$AVAIL_ROOTS" "-DavailRenames=$AVAIL_RENAMES")
 if [ "$ENABLE_ASSERTIONS" = true ]; then
   VMARGS+=( -ea )
+fi
+if [ "$AVAIL_DEVELOPER" = true ]; then
+  VMARGS+=( -DavailDeveloper=true )
 fi
 
 if [ "$DRY_RUN" = true ]; then
